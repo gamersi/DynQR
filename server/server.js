@@ -1,3 +1,4 @@
+//imports
 const express = require('express')
 const app = express();
 const port = 80;
@@ -5,7 +6,7 @@ const cors = require('cors');
 const firebase = require('firebase/app')
 require('firebase/firestore');
 
-firebase.initializeApp({
+firebase.initializeApp({ // App init
     apiKey: "AIzaSyCRJNpLOTC1CMgyOeTarZ42hFuxb_X-Skw",
     authDomain: "dynqr-admin-id.firebaseapp.com",
     projectId: "dynqr-admin-id",
@@ -14,9 +15,9 @@ firebase.initializeApp({
     appId: "1:400113144848:web:d612d8b739a350fb39e695",
     measurementId: "G-KNQE3TDF0C"
 });
-const firestore = firebase.firestore();
+const firestore = firebase.firestore(); // Firestore initialisieren
 
-var urlfrontend = 'http://localhost:3000';
+var urlfrontend = 'http://localhost:3000'; // Die URL vom FrontEnd
 
 app.use(cors());
 app.use(express.json())
@@ -42,9 +43,9 @@ app.post('/api/addQrCode', (req, res) => {
         res.sendStatus(500); // https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#5xx_server_errors (500=Server)
     })
 })
-app.get('/func/redir', (req, res) => {
+app.get('/func/redir/:id', (req, res) => {
     console.log('req');
-    const uuid = req.query.id
+    const uuid = req.params.id
     const isUrl = firestore.collection('QRCodes').doc(uuid).get().then((doc) => {
         if(doc.exists){
             res.send(doc.data().isUrl + ' ' + doc.data().url)

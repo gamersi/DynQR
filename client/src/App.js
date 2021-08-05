@@ -94,7 +94,7 @@ function Home(){
     const agreement2 = document.getElementsByClassName('agreementText')[0];
     const submit = document.getElementsByClassName('submit')[0];
     const uniqueID = UUID();
-    setQr(urlbackend + '/func/redir?id=' + uniqueID)
+    setQr(urlbackend + '/func/redir/' + uniqueID)
     var isUrl = false;
     if(validURL(input.value)){
       isUrl = true;
@@ -113,7 +113,7 @@ function Home(){
         alert(`FEHLER(${response.status})`)
       }else{
         submit.textContent = "Download";
-        submit.classList.re move('submit');
+        submit.classList.remove('submit');
         submit.classList.add('download');
         agreement.remove();
         agreement2.remove();
