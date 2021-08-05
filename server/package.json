@@ -1,0 +1,21 @@
+{
+  "name": "dyqr-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "bgStart": "pm2 server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "firebase": "^8.7.1",
+    "firebase-admin": "^9.10.0",
+    "https": "^1.0.0",
+    "react-firebase-hooks": "^3.0.4"
+  }
+}
