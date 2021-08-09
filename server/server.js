@@ -48,7 +48,11 @@ app.get('/func/redir/:id', (req, res) => {
     const uuid = req.params.id
     const isUrl = firestore.collection('QRCodes').doc(uuid).get().then((doc) => {
         if(doc.exists){
-            res.send(doc.data().isUrl + ' ' + doc.data().url)
+            if(doc.data().isUrl){
+                res.redirect(urlfrontend + "/redir?url=" + doc.data().url)
+            }else{
+                res.redirect(urlfrontend + "/text?text=" + doc.data().url)
+            }
         }else{
             res.redirect(urlfrontend + '/invalid')
         }
