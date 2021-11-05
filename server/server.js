@@ -3,9 +3,10 @@ const express = require('express')
 const app = express();
 const port = 80;
 const cors = require('cors');
-const admin = require('firebase-admin')
+const firebase = require('firebase/app')
+require('firebase/firestore');
 
-admin.initializeApp({ // App init
+firebase.initializeApp({ // App init
     apiKey: "AIzaSyCRJNpLOTC1CMgyOeTarZ42hFuxb_X-Skw",
     authDomain: "dynqr-admin-id.firebaseapp.com",
     projectId: "dynqr-admin-id",
@@ -15,20 +16,26 @@ admin.initializeApp({ // App init
     measurementId: "G-KNQE3TDF0C"
 })
 
-const firestore = admin.firestore(); // Firestore initialisieren
+const firestore = firebase.firestore(); // Firestore initialisieren
 
 var urlfrontend = 'http://localhost:3000'; // Die URL vom FrontEnd
 
-app.use(cors());
+app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded())
 
+/*
+    --------------
+    Die API-Routen
+    --------------
+*/
+
 app.post('/api/addQrCode', (req, res) => {
-    const uuid = req.body.uuid;
-    const userID = req.body.userID;
-    const url = req.body.url;
-    const username = req.body.username;
-    const isUrl = req.body.isUrl;
+    const uuid = req.body.uuid
+    const userID = req.body.userID
+    const url = req.body.url
+    const username = req.body.username
+    const isUrl = req.body.isUrl
     firestore.collection('QRCodes').doc(uuid).set({
         uuid: uuid,
         userID: userID,
@@ -38,11 +45,35 @@ app.post('/api/addQrCode', (req, res) => {
         blocked: false
     }
     ).then(() => {
-        res.sendStatus(200); // https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#2xx_success (200=OK)
+        res.sendStatus(200)  // https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#2xx_success (200=OK)
     }).catch(() => {
-        res.sendStatus(500); // https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#5xx_server_errors (500=Server)
+        res.sendStatus(500)  // https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#5xx_server_errors (500=Server)
     })
 })
+
+app.post('/api/getqrcodes', (req, res) => {
+    const { uid } = req.body;
+    firestore.collection('QRCodes').where('userID', '==', uid).get().then((snapshot) => {
+        var data = []
+        snapshot.forEach((doc) => {
+            data.push(doc.data())
+        })
+        if(snapshot.empty) {
+            res.send({ success: false, msg: 'Kein QR Code vorhanden!' })
+        } else {
+            data.push({ success: true })
+            res.send(data)
+        }
+    }).catch(() => {
+        res.send({ success: 'false', msg: 'Unbekannter Fehler' })
+    })
+})
+
+/*
+    --------------
+    Die Funktionen
+    --------------
+*/
 
 app.get('/func/redir/:id', (req, res) => {
     console.log('req');

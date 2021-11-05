@@ -36,24 +36,25 @@ const urlbackend = "http://localhost"
 
 function App() {
 
-  const [user] = useAuthState(auth);
+  const [user, loading, error] = useAuthState(auth);
   const banned = localStorage.getItem('banned')
 
   return (
     <Router>
+      {error ? <Error/> : 
       <div className="App">
       <Switch>
           <Route path="/dashboard">
-            {user ? <Dashboard /> : <NotSignedIn />}
-          </Route>
+            {loading ? null : (user ? <Dashboard /> : <NotSignedIn />)}
+          </Route>⌈
           <Route path="/redirect">
-            {user ? <Dashboard /> : <NotSignedIn />}
+            {loading ? null : (user ? <Dashboard /> : <NotSignedIn />)}
           </Route>
           <Route path="/">
-            {banned ? <Banned /> : (user ? <Home /> : <NotSignedIn />)}
+            {loading ? null : (banned ? <Banned /> : (user ? <Home /> : <NotSignedIn />))}
           </Route>
         </Switch>
-    </div>
+    </div>}
     </Router>
   );
 }
@@ -98,6 +99,14 @@ function Banned(){
   );
 }
 
+function Error(){
+  return (
+    <div className="Error">
+        <h1 className="white">Unbekannter Fehler!</h1>
+    </div>
+  );
+}
+
 function Dashboard(){
   let menu = null;
   const togglePopup = () => {
@@ -113,6 +122,18 @@ function Dashboard(){
     menu.style.display = 'none'
   }
 
+    console.log('fetching codes')
+    axios.post(urlbackend + '/api/getqrcodes', {
+      uid: auth.currentUser.uid,
+    }).then((response) => {
+      console.log(response)
+      if(response.data.success === false){
+        // no success
+      }
+    }).catch((err) => {
+      console.log(err)
+    })
+
   return (
     <div className="Dashboard">
       <img src={auth.currentUser.photoURL || usericon} onClick={togglePopup} onLoad={initPopup} className="usericon" alt="usericon" />
@@ -120,6 +141,8 @@ function Dashboard(){
         <button id="dashboardBtn"><Link id="link" to="/">Home</Link></button>
         <button id="logoutBtn" onClick={() => auth.signOut()}>Log out</button>
       </div>
+      <ul>
+      </ul>
     </div>
   )
 }
