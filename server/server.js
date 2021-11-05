@@ -3,10 +3,9 @@ const express = require('express')
 const app = express();
 const port = 80;
 const cors = require('cors');
-const firebase = require('firebase/app')
-require('firebase/firestore');
+const admin = require('firebase-admin')
 
-firebase.initializeApp({ // App init
+admin.initializeApp({ // App init
     apiKey: "AIzaSyCRJNpLOTC1CMgyOeTarZ42hFuxb_X-Skw",
     authDomain: "dynqr-admin-id.firebaseapp.com",
     projectId: "dynqr-admin-id",
@@ -14,8 +13,9 @@ firebase.initializeApp({ // App init
     messagingSenderId: "400113144848",
     appId: "1:400113144848:web:d612d8b739a350fb39e695",
     measurementId: "G-KNQE3TDF0C"
-});
-const firestore = firebase.firestore(); // Firestore initialisieren
+})
+
+const firestore = admin.firestore(); // Firestore initialisieren
 
 var urlfrontend = 'http://localhost:3000'; // Die URL vom FrontEnd
 
@@ -43,6 +43,7 @@ app.post('/api/addQrCode', (req, res) => {
         res.sendStatus(500); // https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#5xx_server_errors (500=Server)
     })
 })
+
 app.get('/func/redir/:id', (req, res) => {
     console.log('req');
     const uuid = req.params.id

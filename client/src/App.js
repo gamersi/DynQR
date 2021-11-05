@@ -10,9 +10,13 @@ import 'firebase/analytics';
 import QRcode from 'qrcode.react'
 
 import { useAuthState } from 'react-firebase-hooks/auth';
-// eslint-disable-next-line
-import { useCollectionData } from 'react-firebase-hooks/firestore';
 import axios from 'axios';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link
+} from "react-router-dom";
 
 // Initialize Firebase
 firebase.initializeApp({
@@ -33,13 +37,24 @@ const urlbackend = "http://localhost"
 function App() {
 
   const [user] = useAuthState(auth);
+  const banned = localStorage.getItem('banned')
 
   return (
-    <div className="App">
-      <section>
-        {user ? <Home /> : <NotSignedIn />}
-      </section>
+    <Router>
+      <div className="App">
+      <Switch>
+          <Route path="/dashboard">
+            {user ? <Dashboard /> : <NotSignedIn />}
+          </Route>
+          <Route path="/redirect">
+            {user ? <Dashboard /> : <NotSignedIn />}
+          </Route>
+          <Route path="/">
+            {banned ? <Banned /> : (user ? <Home /> : <NotSignedIn />)}
+          </Route>
+        </Switch>
     </div>
+    </Router>
   );
 }
 
@@ -47,9 +62,11 @@ function NotSignedIn(){
   const signInWithGoogle = () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider).then((response) => {
+      localStorage.setItem('uid', response.user.uid)
     }).catch((rejected) => {
       if(rejected.code === "auth/user-disabled"){
         alert('Du bist gebannt!');
+        localStorage.setItem('banned', true)
       }else{
         alert('Fehler(Sonstige/' + rejected.code + ')!');
       }
@@ -66,6 +83,47 @@ function NotSignedIn(){
   );
 }
 
+function Banned(){
+  const retry = () => {
+    localStorage.removeItem('banned')
+    window.location.reload()
+  }
+  return (
+    <div className="Banned">
+        <h1 className="white">Du bist gebannt!</h1>
+        <div className="panel">
+          <button className="loginBtn" onClick={retry}>Erneut Probieren</button>
+        </div>
+    </div>
+  );
+}
+
+function Dashboard(){
+  let menu = null;
+  const togglePopup = () => {
+    menu = document.getElementById('accmenu');
+    if(menu.style.display === 'none'){
+      menu.style.display = 'flex';
+    }else{
+      menu.style.display = 'none';
+    }
+  }
+  const initPopup = () => {
+    menu = document.getElementById('accmenu')
+    menu.style.display = 'none'
+  }
+
+  return (
+    <div className="Dashboard">
+      <img src={auth.currentUser.photoURL || usericon} onClick={togglePopup} onLoad={initPopup} className="usericon" alt="usericon" />
+      <div id="accmenu">
+        <button id="dashboardBtn"><Link id="link" to="/">Home</Link></button>
+        <button id="logoutBtn" onClick={() => auth.signOut()}>Log out</button>
+      </div>
+    </div>
+  )
+}
+
 function Home(){
   const [qr, setQr] = useState('https://www.youtube.com/watch?v=oHg5SJYRHA0');
   let menu = null;
@@ -78,22 +136,35 @@ function Home(){
     }
   }
 
+  const initPopup = () => {
+    menu = document.getElementById('accmenu')
+    menu.style.display = 'none'
+  }
+
   function validURL(str) {
     var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
       '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
       '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
       '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
       '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
-      '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
-    return !!pattern.test(str);
+      '(\\#[-a-z\\d_]*)?$','i'
+    ) // fragment locator
+    return !!pattern.test(str)
   }
 
   const genQRCode = () => {
-    const input = document.getElementsByClassName('urlInput')[0];
-    const agreement = document.getElementsByClassName('checkBoxAgreement')[0];
-    const agreement2 = document.getElementsByClassName('agreementText')[0];
-    const submit = document.getElementsByClassName('submit')[0];
-    const uniqueID = UUID();
+    const input = document.getElementsByClassName('urlInput')[0]
+    const agreement = document.getElementsByClassName('checkBoxAgreement')[0]
+    const agreement2 = document.getElementsByClassName('agreementText')[0]
+    const submit = document.getElementsByClassName('submit')[0]
+    const dlqr = document.createElement('button')
+    const pannel = document.getElementsByClassName('panel')[0]
+    const uniqueID = UUID()
+
+    //setup dlqr button
+    dlqr.className = 'dl'
+    dlqr.innerHTML = 'QR-Code herunterladen'
+
     setQr(urlbackend + '/func/redir/' + uniqueID)
     var isUrl = false;
     if(validURL(input.value)){
@@ -112,12 +183,11 @@ function Home(){
       if(response.status != 200){
         alert(`FEHLER(${response.status})`)
       }else{
-        submit.textContent = "Download";
-        submit.classList.remove('submit');
-        submit.classList.add('download');
-        agreement.remove();
-        agreement2.remove();
-        input.remove();
+        submit.remove()
+        agreement.remove()
+        agreement2.remove()
+        input.remove()
+        pannel.appendChild(dlqr)
       }
     }).catch((err) => {
       console.log(err)
@@ -130,9 +200,9 @@ function Home(){
   return (
     <div className="signedIn">
         <img src={logo} className="logo" alt="logo" />
-        <img src={auth.currentUser.photoURL || usericon} onClick={togglePopup} className="usericon" alt="usericon" />
+        <img src={auth.currentUser.photoURL || usericon} onClick={togglePopup} onLoad={initPopup} className="usericon" alt="usericon" />
         <div id="accmenu">
-          <button id="dashboardBtn">Dashboard</button>
+          <button id="dashboardBtn"><Link id="link" to="/dashboard">Dashboard</Link></button>
           <button id="logoutBtn" onClick={() => auth.signOut()}>Log out</button>
         </div>
         <div className="panel">
