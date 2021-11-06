@@ -1,11 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
 
 body{
-  background-color: #1D1D1D;
+  background-color: #0b0e11;
 }
 
 #link {
-  color: rgb(0, 0, 0);
+  color: white;
   text-decoration: none;
   width: 100%;
   height: 100%;
@@ -20,6 +20,7 @@ body{
   cursor: pointer;
   pointer-events: none;
 }
+
 .usericon-lkd{
   position: absolute;
   width: 63px;
@@ -39,13 +40,17 @@ body{
   border-radius: 50%;
 }
 
+.newQRText {
+  color: white;
+}
+
 .panel{
   position: absolute;
   width: 37.97vw;
   height: 72.25vh;
   left: 29vw;
   top: 20vh;
-  background: #FFFF;
+  background: #151a21;
   box-shadow: 30px 26px 20px rgba(0, 0, 0, 0.25);
   border-radius: 15px;
   text-align: center;
@@ -58,7 +63,8 @@ body{
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: #00E0FF;
+  background: #fb4f52;
+  color: white;
   border-radius: 100%;
   font-family: Poppins;
   font-style: normal;
@@ -78,7 +84,7 @@ body{
 #accmenu{
   display: none;
   position: absolute;
-  background-color: white;
+  background-color: #151a21;
   width: 10vw;
   height: 9vh;
   right: 5vw;
@@ -87,6 +93,7 @@ body{
 }
 
 #dashboardBtn{
+  color: white;
   position: absolute;
   border: transparent;
   background-color: transparent;
@@ -98,6 +105,7 @@ body{
   /* left: 2.5vw; */
 }
 #logoutBtn{
+  color: white;
   position: absolute;
   border: transparent;
   background-color: transparent;
@@ -130,9 +138,10 @@ h1{
 
 .urlInput{
   position: absolute;
-  background-color: #C4C4C4;
+  background-color: #1e232b;
   border: none;
-  border-radius: 77px;
+  color: white;
+  border-radius: 20px;
   width: 90%;
   height: 8vh;
   left: 1vw;
@@ -157,13 +166,15 @@ h1{
   top: 50vh;
   left: 5vw;
   font-size: 20pt;
+  color: white;
 }
 
 .submit{
   position: absolute;
   border: none;
-  border-radius: 77px;
-  background-color: #00E0FF;
+  border-radius: 20px;
+  background-color: #fb4f52;
+  color:white;
   height: 10vh;
   width: 90%;
   left: 2vw;
@@ -177,8 +188,8 @@ h1{
 .download{
   position: absolute;
   border: none;
-  border-radius: 77px;
-  background-color: #00E0FF;
+  border-radius: 20px;
+  background-color: #fb4f52;
   height: 10vh;
   width: 90%;
   left: 2vw;
@@ -189,131 +200,136 @@ h1{
   outline: none;
 }
 
-/* MenuBar 
+/* dashboardlist */
 
-position: absolute;
-width: 697px;
-height: 54px;
-left: 478px;
-top: 71px;
-*/
+.name{
+  display: inline;
+}
 
+.codelist{
+  margin-top: 2.5vw;
+}
 
-/* Was ist ein DynQRCode? 
+.listEntry{
+  list-style: none;
+  display: block
+}
 
-position: absolute;
-width: 438px;
-height: 54px;
-left: 737px;
-top: 71px;
+.listEntryContent{
+  display: inline-block;
+  width: 90%;
+  padding: 10px;
+  font-family: Poppins;
+  text-align: left;
+  color: #FFFFFF;
+  background-color: #151a21;
+  border-radius: 20px;
+  margin-top: 10px;
+}
 
-font-family: Poppins;
-font-style: normal;
-font-weight: normal;
-font-size: 36px;
-line-height: 54px;
-text-align: center;
+.btn-dash {
+  display: inline-block;
+  background: #fb4f52;
+  border: none;
+  cursor: pointer;
+  color: #FFF;
+  font-family: poppins;
+  padding: 5px;
+  font-size: 15px;
+  border-radius: 5px;
+  margin-left: 10px;
+}
 
-color: #FFFFFF;
-*/
+.editMenu {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #241e2b54;
+}
 
-/* StartseiteBtn 
+.editMenuContent {
+  background: #ffffff;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: auto;
+  margin-bottom: auto;
+  width: 50%;
+}
 
-position: absolute;
-width: 173px;
-height: 54px;
-left: 478px;
-top: 71px;
-*/
+/* END: dashboardlist */
 
+/* MEDIA QUERIES */
 
-/* Startseite 
+@media screen and (max-width: 1024px) {
+  .agreementText {
+    font-size: 15pt;
+  }
+  .urlInput {
+    font-size: 15pt;
+  }
+  .submit {
+    font-size: 15pt;
+  }
+  .download {
+    font-size: 15pt;
+  }
+  .newQRText {
+    font-size: 15pt;
+  }
+  
+  #accmenu {
+    width: 20vw;
+  }
+}
 
-position: absolute;
-width: 171px;
-height: 54px;
-left: 478px;
-top: 71px;
+@media screen and (max-width: 768px) {
+  .agreementText {
+    font-size: 15pt;
+    left: 7vw;
+  }
 
-font-family: Poppins;
-font-style: normal;
-font-weight: normal;
-font-size: 36px;
-line-height: 54px;
-text-align: center;
+  .urlInput {
+    width: 85%;
+    height: 8vh;
+    left: 1vw;
+    font-size: 15pt;
+  }
+}
 
-color: #FFFFFF;
-*/
+@media screen and (max-width: 425px) {
+  .agreementText {
+    font-size: 10pt;
+    left: 6vw;
+  }
+  .urlInput {
+    font-size: 10pt;
+  }
+  .submit {
+    font-size: 10pt;
+  }
+  .download {
+    font-size: 10pt;
+  }
+  .newQRText {
+    font-size: 10pt;
+  }
 
+  #accmenu {
+    width: 25vw;
+  }
 
+  .urlInput {
+    width: 80%;
+    font-size: 10pt;
+  }
+}
 
-/* Line 1
+@media screen and (max-height: 820px) {
+  #accmenu {
+    top: 19vh;
+  }
+}
 
-position: absolute;
-width: 170px;
-height: 0px;
-left: 481px;
-top: 119px;
-
-border: 3px solid #FFFFFF;
-transform: rotate(-0.33deg);
-*/
-
-/* dropdown 
-
-position: absolute;
-visibility: hidden;
-width: 264px;
-height: 164px;
-left: 1145px;
-top: 146px;
-*/
-
-/* DropdownBG 
-
-position: absolute;
-width: 264px;
-height: 164px;
-left: 1145px;
-top: 146px;
-
-background: #FFFFFF;
-border-radius: 30px;
-*/
-
-/* Register 
-
-position: absolute;
-width: 202px;
-height: 48px;
-left: 1176px;
-top: 172px;
-
-font-family: Poppins;
-font-style: normal;
-font-weight: normal;
-font-size: 36px;
-line-height: 54px;
-text-align: center;
-
-color: #000000;
-*/
-
-
-/* Login 
-
-position: absolute;
-width: 202px;
-height: 48px;
-left: 1176px;
-top: 238px;
-
-font-family: Poppins;
-font-style: normal;
-font-weight: normal;
-font-size: 36px;
-line-height: 54px;
-text-align: center;
-
-color: #000000;
-*/
+/* END: MEDIA QUERIES */

@@ -69,6 +69,53 @@ app.post('/api/getqrcodes', (req, res) => {
     })
 })
 
+app.post('/api/deletecode', (req, res) => {
+    const { uuid } = req.body;
+    //delete QR code
+    firestore.collection('QRCodes').doc(uuid).delete().then(() => {
+        res.send({ success: true })
+    }).catch(() => {
+        res.send({ success: false })
+    })
+})
+
+app.post('/api/deactivatecode', (req, res) => {
+    const { uuid } = req.body;
+    //deactivate QR code (set blocked to true)
+    firestore.collection('QRCodes').doc(uuid).update({
+        blocked: true
+    }).then(() => {
+        res.send({ success: true })
+    }).catch(() => {
+        res.send({ success: false })
+    })
+})
+
+app.post('/api/activatecode', (req, res) => {
+    const { uuid } = req.body;
+    //deactivate QR code (set blocked to true)
+    firestore.collection('QRCodes').doc(uuid).update({
+        blocked: false
+    }).then(() => {
+        res.send({ success: true })
+    }).catch(() => {
+        res.send({ success: false, msg: 'Unbekannter Fehler' })
+    })
+})
+
+app.post('/api/editcode', (req, res) => {
+    const { uuid, url } = req.body;
+    // set url to url
+    firestore.collection('QRCodes').doc(uuid).update({
+        url: url
+    }).then(() => {
+        res.send({ success: true })
+    }).catch(() => {
+        res.send({ success: false, msg: 'Unbekannter Fehler' })
+    })
+})
+
+
 /*
     --------------
     Die Funktionen
