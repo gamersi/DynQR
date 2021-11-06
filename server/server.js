@@ -103,6 +103,16 @@ app.post('/api/activatecode', (req, res) => {
     })
 })
 
+app.post('/api/getactive', (req, res) => {
+    const { uuid } = req.body;
+    //check if blocked is true or false
+    firestore.collection('QRCodes').doc(uuid).get().then((doc) => {
+        res.send({ success: true, blocked: doc.data().blocked })
+    }).catch(() => {
+        res.send({ success: false, msg: 'Unbekannter Fehler' })
+    })
+})
+
 app.post('/api/editcode', (req, res) => {
     const { uuid, url } = req.body;
     // set url to url
@@ -123,12 +133,14 @@ app.post('/api/editcode', (req, res) => {
 */
 
 app.get('/func/redir/:id', (req, res) => {
-    console.log('req');
     const uuid = req.params.id
     const isUrl = firestore.collection('QRCodes').doc(uuid).get().then((doc) => {
         if(doc.exists){
+            if(doc.data().blocked){
+                return res.redirect(urlfrontend + '/blocked')
+            }
             if(doc.data().isUrl){
-                res.redirect(urlfrontend + "/redir?url=" + doc.data().url)
+                res.redirect(urlfrontend + "/redirect?url=" + doc.data().url)
             }else{
                 res.redirect(urlfrontend + "/text?text=" + doc.data().url)
             }

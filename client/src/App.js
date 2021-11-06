@@ -1,5 +1,5 @@
 // eslint-disable-next-line
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import usericon from './assets/usericon.svg';
 import logo from './assets/logo.svg';
 import './App.css';
@@ -52,7 +52,16 @@ function App() {
             {loading ? null : (user ? <Dashboard /> : <NotSignedIn />)}
           </Route>⌈
           <Route path="/redirect">
-            {loading ? null : (user ? <Dashboard /> : <NotSignedIn />)}
+            <Redirect />
+          </Route>
+          <Route path="/text">
+            <Text />
+          </Route>
+          <Route path="/invalid">
+            <Invalid />
+          </Route>
+          <Route path="/blocked">
+            <Deactivated />
           </Route>
           <Route path="/">
             {loading ? null : (banned ? <Banned /> : (user ? <Home /> : <NotSignedIn />))}
@@ -103,6 +112,59 @@ function Banned(){
   );
 }
 
+function Redirect(){
+  const redirect = () => {
+    const params = new URLSearchParams(window.location.search);
+    const url = params.get('url');
+    if(url.startsWith('http')){
+      window.location.replace(url);
+    }else{
+      window.location.replace('http://' + url);
+    }
+  }
+
+  return (
+    <div className="Redirect">
+        <h1 className="white" onLoad={redirect()} >Weiterleitung</h1>
+    </div>
+  );
+}
+
+function Text(){
+
+  const [text, setText] = useState('Loading...');
+
+  useEffect(() => {
+    console.log("hi")
+    const params = new URLSearchParams(window.location.search);
+    const text = params.get('text');
+    if(text !== null) setText(text);
+    if(text === null) setText('Fehler!')
+  }, []);
+
+  return (
+    <div className="Text">
+        <h1 className="white" id="textDisplay">{text}</h1>
+    </div>
+  );
+}
+
+function Invalid(){
+  return (
+    <div className="Invalid">
+        <h1 className="white">UPS! Dieser QRCode ist (nicht mehr) gültig</h1>
+    </div>
+  );
+}
+
+function Deactivated(){
+  return (
+    <div className="Blocked">
+        <h1 className="white">Dieser QRCode wurde (temporär) vom Ersteller deaktiviert</h1>
+    </div>
+  );
+}
+
 function Error(){
   return (
     <div className="Error">
@@ -142,7 +204,7 @@ function Dashboard(){
     })
   }
 
-  const displayError = (err) => {
+  const displayError = async (err) => {
     const ul = document.getElementById('codelist')
     const parent = document.getElementById('list')
     const errText = document.createElement('h1')
@@ -153,10 +215,24 @@ function Dashboard(){
     ul.remove()
   }
 
-  const displayList = (list) => {
+  const displayList = async(list) => {
     const ul = document.getElementById('codelist')
-    // const parent = document.getElementById('list')
-    list.forEach((item) => {
+    list.forEach(async(item) => {
+      if(item === null) return
+      let isActive;
+      let uuid = item.uuid
+      await axios.post(urlbackend + '/api/getactive', {
+        uuid
+      }).then((response) => {
+        if(response.data.success === false){
+          displayError(response.data.msg)
+        }else{
+          isActive = !response.data.blocked
+        }
+      }).catch((err) => {
+        console.log(err)
+      })
+      
       const li = document.createElement('li')
       const div = document.createElement('div')
       const name = document.createElement('h1')
@@ -167,19 +243,20 @@ function Dashboard(){
       name.className = 'name'
 
       // deactivate button
-      deactivateBtn.innerHTML = 'Deaktivieren'
+      deactivateBtn.innerHTML = isActive ? 'Deaktivieren' : 'Reaktivieren'
       deactivateBtn.className = 'deactivateBtn'
       deactivateBtn.classList.add('btn-dash')
       deactivateBtn.setAttribute('data-url', item.url)
       deactivateBtn.setAttribute('data-uuid', item.uuid)
       deactivateBtn.addEventListener('click', () => {
-        axios.post(urlbackend + '/api/deactivatecode', {
+        let furl = isActive ? '/api/deactivatecode' : '/api/activatecode'
+        axios.post(urlbackend + furl, {
           uuid: item.uuid,
         }).then((response) => {
           if(response.data.success === false){
             displayError(response.data.msg)
           }else{
-            alert("QRCode deaktiviert!")
+            showPopup(isActive ? 'QRCode deaktiviert!' : 'QRCode reaktiviert!', true)
           }
         }).catch((err) => {
 
@@ -197,10 +274,9 @@ function Dashboard(){
           uuid: item.uuid
         }).then((response) => {
           if(response.data.success === false){
-            alert(response.data.msg)
+            showPopup(response.data.msg, false)
           }else{
-            alert("QRCode gelöscht!")
-            window.location.reload()
+            showPopup("QRCode gelöscht!", true)
           }
         }).catch((err) => {
 
@@ -252,8 +328,7 @@ function Dashboard(){
         if(response.data.success === false){
           alert(response.data.msg)
         }else{
-          alert("QRCode bearbeitet!")
-          window.location.reload()
+          showPopup("QRCode bearbeitet!", true)
         }
       }).catch((err) => {
         alert(err)
@@ -263,6 +338,28 @@ function Dashboard(){
     })
     editMenuContent.appendChild(editMenuHeader)
     editMenuContent.appendChild(editMenuInput)
+    editMenuContent.appendChild(editMenuBtn)
+    editMenu.appendChild(editMenuContent)
+    document.body.appendChild(editMenu)
+  }
+
+  const showPopup = (text, reloadOnClose) => {
+    const editMenu = document.createElement('div')
+    const editMenuContent = document.createElement('div')
+    const editMenuHeader = document.createElement('h1')
+    const editMenuBtn = document.createElement('button')
+    editMenu.className = 'editMenu'
+    editMenuContent.className = 'editMenuContent'
+    editMenuHeader.innerHTML = text
+    editMenuHeader.className = 'editMenuHeader'
+    editMenuBtn.className = 'editMenuBtn'
+    editMenuBtn.innerHTML = 'OK'
+    editMenuBtn.addEventListener('click', () => {
+      editMenu.remove()
+      editMenuContent.remove()
+      if(reloadOnClose) window.location.reload()
+    })
+    editMenuContent.appendChild(editMenuHeader)
     editMenuContent.appendChild(editMenuBtn)
     editMenu.appendChild(editMenuContent)
     document.body.appendChild(editMenu)
