@@ -18,7 +18,7 @@ firebase.initializeApp({ // App init
 
 const firestore = firebase.firestore(); // Firestore initialisieren
 
-var urlfrontend = 'http://localhost:3000'; // Die URL vom FrontEnd
+var urlfrontend = 'http://192.168.178.31:3000'; // Die URL vom FrontEnd
 
 app.use(cors())
 app.use(express.json())
@@ -120,6 +120,16 @@ app.post('/api/editcode', (req, res) => {
         url: url
     }).then(() => {
         res.send({ success: true })
+    }).catch(() => {
+        res.send({ success: false, msg: 'Unbekannter Fehler' })
+    })
+})
+
+app.post('/api/geturl', (req, res) => {
+    const { uuid } = req.body;
+    //get url
+    firestore.collection('QRCodes').doc(uuid).get().then((doc) => {
+        res.send({ success: true, url: doc.data().url })
     }).catch(() => {
         res.send({ success: false, msg: 'Unbekannter Fehler' })
     })

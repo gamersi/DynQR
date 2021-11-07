@@ -200,6 +200,22 @@ h1{
   outline: none;
 }
 
+.qrlink {
+  position: absolute;
+  top: 55vh;
+  left: 2vw;
+  text-decoration: none;
+  color: white;
+  font-family: Poppins;
+  font-style: normal;
+  font-weight: normal;
+  line-height: 24px;
+  outline: none;
+  border-style: solid;
+  border-color: transparent;
+  cursor: pointer;
+}
+
 /* dashboardlist */
 
 .name{
@@ -306,7 +322,14 @@ h1{
   .newQRText {
     font-size: 15pt;
   }
-  
+  .qrlink {
+    width: 36vw;
+    text-indent: auto;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 10pt;
+  }
   #accmenu {
     width: 20vw;
   }
@@ -357,6 +380,13 @@ h1{
 @media screen and (max-height: 820px) {
   #accmenu {
     top: 19vh;
+  }
+
+  .loginBtn{
+    border-radius: 1000px;
+    height: 10vh;
+    width: 10vh;
+    font-size: 12pt;
   }
 }
 
