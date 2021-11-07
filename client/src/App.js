@@ -14,6 +14,7 @@ import {
   Switch,
   Route
 } from 'react-router-dom';
+//components
 import NotSignedIn, { initLogIn } from './components/Start/NotSignedIn';
 import Banned from './components/Start/Banned';
 import Redirect from './components/Start/Redirect';
@@ -53,9 +54,6 @@ initDashboard(auth,urlbackend, usericon)
 initHome(urlbackend, auth, usericon, logo);
 
 function App() {
-
-  // const [isTokenFound, setTokenFound] = useState(false);
-  // getToken(setTokenFound)
 
   const [user, loading, error] = useAuthState(auth);
   const banned = localStorage.getItem('banned')
