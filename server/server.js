@@ -1,12 +1,12 @@
 //imports
-const express = require('express')
-const app = express();
-const port = 80;
-const cors = require('cors');
-const firebase = require('firebase/app')
-require('firebase/firestore');
+import express from 'express';
+const app = express()
+const port = 80
+import cors from 'cors'
+import { initializeApp } from 'firebase/app'
+import { getFirestore, collection, where, getDoc, getDocs, setDoc, updateDoc, doc, deleteDoc} from 'firebase/firestore/lite'
 
-firebase.initializeApp({ // App init
+const fApp = initializeApp({ // App init
     apiKey: "AIzaSyCRJNpLOTC1CMgyOeTarZ42hFuxb_X-Skw",
     authDomain: "dynqr-admin-id.firebaseapp.com",
     projectId: "dynqr-admin-id",
@@ -16,9 +16,9 @@ firebase.initializeApp({ // App init
     measurementId: "G-KNQE3TDF0C"
 })
 
-const firestore = firebase.firestore(); // Firestore initialisieren
-
 var urlfrontend = 'http://192.168.178.31:3000'; // Die URL vom FrontEnd
+
+const db = getFirestore(fApp); // Firestore init
 
 app.use(cors())
 app.use(express.json())
@@ -31,20 +31,16 @@ app.use(express.urlencoded())
 */
 
 app.post('/api/addQrCode', (req, res) => {
-    const uuid = req.body.uuid
-    const userID = req.body.userID
-    const url = req.body.url
-    const username = req.body.username
-    const isUrl = req.body.isUrl
-    firestore.collection('QRCodes').doc(uuid).set({
+    const {uuid, userID, url, username, isUrl} = req.body;
+    const document = doc(db, 'QRCodes/' + uuid)
+    setDoc(document, {
         uuid: uuid,
         userID: userID,
         url: url,
         username: username,
         isUrl: isUrl,
         blocked: false
-    }
-    ).then(() => {
+    }).then(() => {
         res.sendStatus(200)  // https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#2xx_success (200=OK)
     }).catch(() => {
         res.sendStatus(500)  // https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#5xx_server_errors (500=Server)
@@ -53,17 +49,13 @@ app.post('/api/addQrCode', (req, res) => {
 
 app.post('/api/getqrcodes', (req, res) => {
     const { uid } = req.body;
-    firestore.collection('QRCodes').where('userID', '==', uid).get().then((snapshot) => {
-        var data = []
-        snapshot.forEach((doc) => {
+    const QRcodes = collection(db, 'QRCodes')
+    getDocs(QRcodes, where('userID', '==', uid)).then(docs => {
+        let data = []
+        docs.forEach(doc => {
             data.push(doc.data())
         })
-        if(snapshot.empty) {
-            res.send({ success: false, msg: 'Kein QR Code vorhanden!' })
-        } else {
-            data.push({ success: true })
-            res.send(data)
-        }
+        res.send(data)
     }).catch(() => {
         res.send({ success: 'false', msg: 'Unbekannter Fehler' })
     })
@@ -72,17 +64,22 @@ app.post('/api/getqrcodes', (req, res) => {
 app.post('/api/deletecode', (req, res) => {
     const { uuid } = req.body;
     //delete QR code
-    firestore.collection('QRCodes').doc(uuid).delete().then(() => {
+    deleteDoc(doc(db, 'QRCodes/' + uuid)).then(() => {
         res.send({ success: true })
     }).catch(() => {
         res.send({ success: false })
     })
+    // collection(db, 'QRCodes').doc(uuid).delete().then(() => {
+    //     res.send({ success: true })
+    // }).catch(() => {
+    //     res.send({ success: false })
+    // })
 })
 
 app.post('/api/deactivatecode', (req, res) => {
     const { uuid } = req.body;
     //deactivate QR code (set blocked to true)
-    firestore.collection('QRCodes').doc(uuid).update({
+    updateDoc(doc(db, 'QRCodes/' + uuid), {
         blocked: true
     }).then(() => {
         res.send({ success: true })
@@ -94,19 +91,27 @@ app.post('/api/deactivatecode', (req, res) => {
 app.post('/api/activatecode', (req, res) => {
     const { uuid } = req.body;
     //deactivate QR code (set blocked to true)
-    firestore.collection('QRCodes').doc(uuid).update({
+    updateDoc(doc(db, 'QRCodes/' + uuid), {
         blocked: false
     }).then(() => {
         res.send({ success: true })
     }).catch(() => {
-        res.send({ success: false, msg: 'Unbekannter Fehler' })
+        res.send({ success: false })
     })
+    // collection(db, 'QRCodes').doc(uuid).update({
+    //     blocked: false
+    // }).then(() => {
+    //     res.send({ success: true })
+    // }).catch(() => {
+    //     res.send({ success: false, msg: 'Unbekannter Fehler' })
+    // })
 })
 
 app.post('/api/getactive', (req, res) => {
     const { uuid } = req.body;
     //check if blocked is true or false
-    firestore.collection('QRCodes').doc(uuid).get().then((doc) => {
+    const coll = collection(db, 'QRCodes')
+    getDoc(doc(db, 'QRCodes/' + uuid)).then(doc => {
         res.send({ success: true, blocked: doc.data().blocked })
     }).catch(() => {
         res.send({ success: false, msg: 'Unbekannter Fehler' })
@@ -114,25 +119,38 @@ app.post('/api/getactive', (req, res) => {
 })
 
 app.post('/api/editcode', (req, res) => {
-    const { uuid, url } = req.body;
+    const { uuid, url, isUrl} = req.body;
     // set url to url
-    firestore.collection('QRCodes').doc(uuid).update({
-        url: url
+    updateDoc(doc(db, 'QRCodes/' + uuid), {
+        url: url,
+        isUrl: isUrl
     }).then(() => {
         res.send({ success: true })
     }).catch(() => {
         res.send({ success: false, msg: 'Unbekannter Fehler' })
     })
+    // collection(db, 'QRCodes').doc(uuid).update({
+    //     url: url
+    // }).then(() => {
+    //     res.send({ success: true })
+    // }).catch(() => {
+    //     res.send({ success: false, msg: 'Unbekannter Fehler' })
+    // })
 })
 
 app.post('/api/geturl', (req, res) => {
     const { uuid } = req.body;
     //get url
-    firestore.collection('QRCodes').doc(uuid).get().then((doc) => {
+    getDoc(doc(db, 'QRCodes/' + uuid)).then(doc => {
         res.send({ success: true, url: doc.data().url })
     }).catch(() => {
         res.send({ success: false, msg: 'Unbekannter Fehler' })
     })
+    // collection(db, 'QRCodes').doc(uuid).get().then((doc) => {
+    //     res.send({ success: true, url: doc.data().url })
+    // }).catch(() => {
+    //     res.send({ success: false, msg: 'Unbekannter Fehler' })
+    // })
 })
 
 
@@ -144,7 +162,7 @@ app.post('/api/geturl', (req, res) => {
 
 app.get('/func/redir/:id', (req, res) => {
     const uuid = req.params.id
-    const isUrl = firestore.collection('QRCodes').doc(uuid).get().then((doc) => {
+    getDoc(doc(db, 'QRCodes/' + uuid)).then(doc => {
         if(doc.exists){
             if(doc.data().blocked){
                 return res.redirect(urlfrontend + '/blocked')
@@ -158,6 +176,20 @@ app.get('/func/redir/:id', (req, res) => {
             res.redirect(urlfrontend + '/invalid')
         }
     });
+    // collection(db, 'QRCodes').doc(uuid).get().then((doc) => {
+    //     if(doc.exists){
+    //         if(doc.data().blocked){
+    //             return res.redirect(urlfrontend + '/blocked')
+    //         }
+    //         if(doc.data().isUrl){
+    //             res.redirect(urlfrontend + "/redirect?url=" + doc.data().url)
+    //         }else{
+    //             res.redirect(urlfrontend + "/text?text=" + doc.data().url)
+    //         }
+    //     }else{
+    //         res.redirect(urlfrontend + '/invalid')
+    //     }
+    // });
 })
 
 app.listen(port, () => {

@@ -177,9 +177,20 @@ export default function Dashboard(){
       editMenuBtn.className = 'editMenuBtn'
       editMenuBtn.innerHTML = 'Speichern'
       editMenuBtn.addEventListener('click', () => {
+        function validURL(str) {
+          var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+            '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+            '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+            '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+            '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+            '(\\#[-a-z\\d_]*)?$','i'
+          ) // fragment locator
+          return !!pattern.test(str)
+        }
         axios.post(urlbackend + '/api/editcode', {
           uuid: uuid,
-          url: editMenuInput.value
+          url: editMenuInput.value,
+          isUrl: validURL(editMenuInput.value)
         }).then((response) => {
           if(response.data.success === false){
             showPopup(response.data.msg, false)
