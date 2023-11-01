@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import QRcode from 'qrcode.react'
 let urlbackend = null;
 let logo = null;
-
+let url = null;
 
 export function initPreviewCode(urlbackend_, logo_) {
     urlbackend = urlbackend_;
@@ -39,7 +39,8 @@ export default function PreviewCode(){
       const params = new URLSearchParams(window.location.search);
       const id = params.get('id');
       if(id === null) return showPopup('Fehler!', false)
-      setQr(urlbackend + '/func/redir/' + id)
+      url = urlbackend + '/func/redir/' + id
+      setQr(url)
     }, []);
   
     return (
@@ -54,6 +55,8 @@ export default function PreviewCode(){
               bgColor='#151a21'
               fgColor='#fff'
             />
+            <br />
+            <a href={url} className='white'>{url}</a>
           </div>
       </div>
     );

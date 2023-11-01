@@ -4,16 +4,15 @@ import usericon from './assets/usericon.svg';
 import logo from './assets/logo.svg';
 import './App.css';
 
-import firebase from 'firebase/app';
-import 'firebase/auth';
+import { initializeApp } from 'firebase/app';
+import { getAuth } from "firebase/auth";
 import 'firebase/analytics';
 
 import { useAuthState } from 'react-firebase-hooks/auth';
 import {
-  BrowserRouter as Router,
-  Switch,
-  Route
-} from 'react-router-dom';
+  createBrowserRouter,
+  RouterProvider
+} from "react-router-dom";
 //components
 import NotSignedIn, { initLogIn } from './components/Start/NotSignedIn';
 import Banned from './components/Start/Banned';
@@ -26,8 +25,10 @@ import Error from './components/Start/Error';
 import Dashboard, { initDashboard } from './components/Start/Dashboard';
 import Home, { initHome } from './components/Start/Home';
 
+let firebase = null;
+
 try {
-  firebase.initializeApp({
+  firebase = initializeApp({
     apiKey: 'AIzaSyCRJNpLOTC1CMgyOeTarZ42hFuxb_X-Skw',
     authDomain: 'dynqr-admin-id.firebaseapp.com',
     projectId: 'dynqr-admin-id',
@@ -41,14 +42,14 @@ try {
 }
 
 
-const auth = firebase.auth();
+const auth = getAuth(firebase);
 
 // const url = 'http://localhost:3000'
 // const urlbackend = 'http://localhost'
 const urlbackend = 'http://192.168.178.31'
 
 //init components
-initLogIn(firebase, auth, logo, usericon);
+initLogIn( auth, logo, usericon);
 initPreviewCode(urlbackend, logo);
 initDashboard(auth,urlbackend, usericon)
 initHome(urlbackend, auth, usericon, logo);
@@ -58,35 +59,52 @@ function App() {
   const [user, loading, error] = useAuthState(auth);
   const banned = localStorage.getItem('banned')
 
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: loading ? null : (banned ? <Banned /> : (user ? <Home /> : <NotSignedIn/>)),
+    },
+    {
+      path: "/redirect",
+      element: <Redirect />,
+    },
+    {
+      path: "/text",
+      element: <Text />,
+    },
+    {
+      path: "/invalid",
+      element: <Invalid />,
+    },
+    {
+      path: "/blocked",
+      element: <Deactivated />,
+    },
+    {
+      path: "/preview",
+      element: <PreviewCode />,
+    },
+    {
+      path: "/dashboard",
+      element: <Dashboard />,
+    },
+    {
+      path: "/home",
+      element: <Home />,
+    },
+    {
+      path: "*",
+      element: <Error />,
+    },
+  ]);
+
   return (
-    <Router>
+    <>
       {error ? <Error/> : 
       <div className='App'>
-      <Switch>
-          <Route path='/dashboard'>
-            {loading ? null : (banned ? <Banned/> : (user ? <Dashboard /> : <NotSignedIn/>))}
-          </Route>⌈
-          <Route path='/redirect'>
-            <Redirect />
-          </Route>
-          <Route path='/text'>
-            <Text />
-          </Route>
-          <Route path='/invalid'>
-            <Invalid />
-          </Route>
-          <Route path='/blocked'>
-            <Deactivated />
-          </Route>
-          <Route path='/preview'>
-            <PreviewCode />
-          </Route>
-          <Route path='/'>
-            {loading ? null : (banned ? <Banned /> : (user ? <Home /> : <NotSignedIn/>))}
-          </Route>
-        </Switch>
+        <RouterProvider router={router} />
     </div>}
-    </Router>
+    </>
   );
 }
 

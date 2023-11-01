@@ -1,10 +1,10 @@
-let firebase = null
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+
 let auth = null
 let logo = null
 let usericon = null
 
-export function initLogIn(firebase_, auth_, logo_, usericon_) {
-    firebase = firebase_
+export function initLogIn(auth_, logo_, usericon_) {
     auth = auth_
     logo = logo_
     usericon = usericon_
@@ -12,8 +12,8 @@ export function initLogIn(firebase_, auth_, logo_, usericon_) {
 
 export default function NotSignedIn(){
     const signInWithGoogle = () => {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithPopup(provider).then((response) => {
+        const provider = new GoogleAuthProvider();
+        signInWithPopup(auth, provider).then((response) => {
         localStorage.setItem('uid', response.user.uid)
         }).catch((rejected) => {
         if(rejected.code === 'auth/user-disabled'){

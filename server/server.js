@@ -4,7 +4,7 @@ const app = express()
 const port = 80
 import cors from 'cors'
 import { initializeApp } from 'firebase/app'
-import { getFirestore, collection, where, getDoc, getDocs, setDoc, updateDoc, doc, deleteDoc} from 'firebase/firestore/lite'
+import { getFirestore, collection, where, getDoc, getDocs, setDoc, updateDoc, doc, deleteDoc, orderBy} from 'firebase/firestore/lite'
 
 const fApp = initializeApp({ // App init
     apiKey: "AIzaSyCRJNpLOTC1CMgyOeTarZ42hFuxb_X-Skw",
@@ -49,9 +49,9 @@ app.post('/api/addQrCode', (req, res) => {
 
 app.post('/api/getqrcodes', (req, res) => {
     const { uid } = req.body;
+    if (!uid) return res.send({ success: 'false', msg: 'Keine UID angegeben' })
     const QRcodes = collection(db, 'QRCodes')
-    getDocs(QRcodes, where('userID', '==', uid)).then(docs => {
-        let data = []
+    getDocs(QRcodes, where('userID', '==', uid), orderBy('url')).then(docs => {
         docs.forEach(doc => {
             data.push(doc.data())
         })

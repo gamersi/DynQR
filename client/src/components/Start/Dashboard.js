@@ -1,8 +1,10 @@
 import axios from "axios";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
-let auth = null
-let urlbackend = null
-let usericon = null
+let auth = null;
+let urlbackend = null;
+let usericon = null;
+let isLoaded = false;
 
 function setAuth(auth_) {
   auth = auth_
@@ -17,10 +19,18 @@ export function initDashboard(auth_, urlbackend_, usericon_) {
   setAuth(auth_)
   setUrlBackend(urlbackend_)
   setUserIcon(usericon_)
+  isLoaded = false
 }
 
-export default function Dashboard(){
+export default function Dashboard() {
     let menu = null;
+
+    useEffect(() => {
+      if (!auth.currentUser) return
+      isLoaded = false
+      console.log('useEffect called')
+    }, [])
+
     const togglePopup = () => {
       menu = document.getElementById('accmenu');
       if(menu.style.display === 'none'){
@@ -35,6 +45,12 @@ export default function Dashboard(){
     }
   
     const fetchData = async () => {
+      if (!auth.currentUser) return
+      if (isLoaded) {
+        console.log('already loaded')
+        return
+      }
+      isLoaded = true
       axios.post(urlbackend + '/api/getqrcodes', {
         uid: auth.currentUser.uid,
       }).then((response) => {
@@ -42,7 +58,6 @@ export default function Dashboard(){
           displayError(response.data.msg)
         }else{
           var data = response.data
-          data[data.length-1] = null
           displayList(data)
         }
       }).catch((err) => {
@@ -231,10 +246,24 @@ export default function Dashboard(){
       editMenu.appendChild(editMenuContent)
       document.body.appendChild(editMenu)
     }
+
+    if (!auth.currentUser) {
+      auth.onAuthStateChanged((user) => {
+        if(!isLoaded){
+          if(user){
+            fetchData()
+            return
+          }
+        }
+      })
+    } else {
+      console.log('fetching data(without auth change)')
+      fetchData()
+    }
   
     return (
-      <div className='Dashboard' onLoad={fetchData}>
-        <img src={auth.currentUser.photoURL || usericon} onClick={togglePopup} onLoad={initPopup} className='usericon' alt='usericon' />
+      <div className='Dashboard'>
+        <img src={auth.currentUser ? (auth.currentUser.photoURL || usericon) : usericon} onClick={togglePopup} onLoad={initPopup} className='usericon' alt='usericon' />
         <div id='accmenu'>
           <button id='dashboardBtn'><Link id='link' to='/'>Home</Link></button>
           <button id='logoutBtn' onClick={() => auth.signOut()}>Log out</button>
